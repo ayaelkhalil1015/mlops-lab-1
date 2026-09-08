@@ -1,0 +1,24 @@
+[project]
+name = "mlops-lab-1"
+version = "0.1.0"
+description = "MLOps Lab 1 - Git, DVC and data preparation for Food-11"
+readme = "README.md"
+authors = [
+    { name = "ayaelkhalil1015", email = "ayaelkhalil1015@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pillow>=12.3.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "food11"
+
+[dependency-groups]
+dev = [
+    "dvc>=3.67.1",
+]
