@@ -2,9 +2,12 @@
 
 ## Question 1
 
-`uv init` created the Python project structure and configuration files. In this
-repo, `pyproject.toml` defines the project metadata and dependencies, while
-`uv.lock` records exact package versions for reproducible installs.
+`uv init` created the initial Python project structure and configuration files.
+In this repository, `pyproject.toml` defines the project metadata and
+dependencies, `.python-version` records the selected Python version, `README.md`
+provides project documentation, and the source directory contains the Python
+code. `uv.lock`, created when the environment was resolved, records the exact
+dependency versions for reproducible installs.
 
 ## Question 2
 
