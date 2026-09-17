@@ -1,7 +1,7 @@
 [project]
 name = "mlops-lab-1"
 version = "0.1.0"
-description = "MLOps Lab 1 - Git, DVC and data preparation for Food-11"
+description = "MLOps Labs - Food-11 data versioning, training and MLflow tracking"
 readme = "README.md"
 authors = [
     { name = "ayaelkhalil1015", email = "ayaelkhalil1015@gmail.com" }
