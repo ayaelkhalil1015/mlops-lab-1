@@ -12,3 +12,7 @@ Thumbs.db
 # Claude Code session state
 .claude/
 /data
+
+# Local MLflow tracking outputs
+mlflow.db
+mlruns/
