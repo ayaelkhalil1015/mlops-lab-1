@@ -106,3 +106,22 @@ Main files:
 
 Local MLflow outputs such as `mlflow.db` and `mlruns/` are intentionally not
 tracked by Git. The Food-11 data remains managed by DVC.
+
+## Lab 5 — CI/CD
+
+GitHub Actions runs Ruff and isolated pytest tests, builds the existing Docker
+image, and checks `/health` with `SKIP_MODEL=1`. Successful pushes to `main`
+publish a lowercase GHCR image tagged with the full commit SHA.
+
+```bash
+uv sync --frozen
+uv run ruff check src tests
+uv run pytest -q
+uv run python src/food11/validate_data.py data/food11_processed_mini
+```
+
+The data validator needs DVC data locally. Model promotion defaults to a dry run:
+`uv run python src/food11/promote.py --version <VERSION> --n <VERIFIED_TEST_SIZE>`.
+Only an explicitly approved `--apply` writes decision tags and model aliases.
+See [Lab 5 answers and manual steps](lab/lab5.md) for branch protection,
+real-data fixture setup, deployment, and required execution evidence.

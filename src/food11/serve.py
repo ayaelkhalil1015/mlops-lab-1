@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 from io import BytesIO
+from typing import Annotated
 
-import mlflow
 import numpy as np
 import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -11,6 +11,7 @@ from PIL import Image
 from torchvision import transforms
 from torchvision.models import ResNet18_Weights
 
+import mlflow
 
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 MODEL_URI = "models:/food11@champion"
@@ -50,6 +51,9 @@ model = None
 @app.on_event("startup")
 def load_model() -> None:
     global model
+    if os.getenv("SKIP_MODEL") == "1":
+        model = None
+        return
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     model = mlflow.pyfunc.load_model(MODEL_URI)
 
@@ -75,7 +79,7 @@ def softmax(logits: np.ndarray) -> np.ndarray:
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)) -> dict[str, float | str]:
+async def predict(file: Annotated[UploadFile, File()]) -> dict[str, float | str]:
     if model is None:
         raise HTTPException(status_code=503, detail="Model is not loaded")
 

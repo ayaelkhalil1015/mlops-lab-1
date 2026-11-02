@@ -13,7 +13,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-import mlflow
 import mlflow.pytorch
 import torch
 from torch import nn
@@ -21,6 +20,8 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 from torchvision.models import ResNet18_Weights
 
+import mlflow
+from food11.provenance import evaluation_revision
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASETS = {
@@ -224,6 +225,8 @@ def main() -> None:
                 "device": str(device),
                 "model_name": "resnet18",
                 "num_classes": NUM_CLASSES,
+                "test_size": len(dataloaders["test"].dataset),
+                "evaluation_revision": evaluation_revision(dataset_root / "evaluation"),
             }
         )
 

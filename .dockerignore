@@ -1,6 +1,29 @@
-.venv/
-data/
-mlruns/
-mlflow.db
-.git/
-__pycache__/
+# Only serving/build inputs may enter the context. Everything else is excluded.
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+!src/**
+
+# Defense in depth, including sensitive files accidentally placed under src/.
+**/.dvc/
+**/.aws/
+**/.git/
+**/.ssh/
+**/.gnupg/
+**/.env
+**/.env.*
+**/*credentials*
+**/*secret*
+**/*.pem
+**/*.key
+**/.netrc
+**/.pypirc
+**/__pycache__/
+**/*.py[cod]
+**/*.p12
+**/*.pfx
+**/.kube/
