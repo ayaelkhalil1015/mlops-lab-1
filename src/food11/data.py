@@ -32,6 +32,8 @@ CLASS_NAMES = {
     10: "Vegetable-Fruit",
 }
 
+CLASSES = list(CLASS_NAMES.values())
+
 TARGET_SIZE = (128, 128)
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
 MINI_LIMIT = 100
@@ -62,6 +64,16 @@ def parse_class_id(file_name: str) -> int:
     return class_id
 
 
+def category_from_filename(filename: str) -> str:
+    return CLASS_NAMES[parse_class_id(Path(filename).name)]
+
+
+def resize_image(img: Image.Image, size: int = 128) -> Image.Image:
+    return ImageOps.exif_transpose(img).convert("RGB").resize(
+        (size, size), Image.Resampling.LANCZOS
+    )
+
+
 def list_raw_images(split: str) -> list[Path]:
     """List valid raw image files for a split, sorted for deterministic ordering."""
     split_dir = RAW_DIR / split
@@ -86,9 +98,7 @@ def prepare_output_directories() -> None:
 def process_image(src_path: Path, dst_path: Path) -> None:
     """Open, normalize orientation, convert to RGB, resize, and save one image."""
     with Image.open(src_path) as img:
-        img = ImageOps.exif_transpose(img)
-        img = img.convert("RGB")
-        img = img.resize(TARGET_SIZE, Image.Resampling.LANCZOS)
+        img = resize_image(img)
         img.save(dst_path)
 
 

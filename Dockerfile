@@ -6,6 +6,10 @@ WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
+# Avoid overwhelming slow connections during dependency downloads.
+ENV UV_CONCURRENT_DOWNLOADS=4
+ENV UV_HTTP_TIMEOUT=120
+
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
 
