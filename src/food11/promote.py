@@ -40,6 +40,15 @@ def promote(client, version: str, n: int | None = None, apply: bool = False) -> 
         n = int(sizes[0])
     elif any(size is not None and int(size) != n for size in sizes):
         raise ValueError("--n conflicts with recorded test_size")
+    revisions = [run.data.params.get("evaluation_revision") for run in runs]
+    if all(revisions) and revisions[0] != revisions[1]:
+        raise ValueError("Evaluation revisions differ; runs are not comparable")
+    provenance_verified = all(revisions)
+    if apply and not provenance_verified:
+        raise ValueError(
+            "Missing evaluation_revision provenance; only dry-run is allowed. "
+            "Recover verified run evidence or create comparable new runs."
+        )
     alias, se, threshold = decide(*accuracies, n)
     result = {
         "decision": alias,
@@ -49,6 +58,8 @@ def promote(client, version: str, n: int | None = None, apply: bool = False) -> 
         "threshold": threshold,
         "n": n,
         "champion_version": str(champion.version),
+        "provenance_status": "verified" if provenance_verified else "unverified",
+        "evaluation_revision": revisions[0] if provenance_verified else None,
     }
     if apply:
         current = client.get_model_version_by_alias(name, "champion")
@@ -59,6 +70,10 @@ def promote(client, version: str, n: int | None = None, apply: bool = False) -> 
                 name, version, f"quality_gate.{key}", str(value)
             )
         client.set_registered_model_alias(name, alias, version)
+    if not provenance_verified:
+        print(
+            "UNVERIFIED evaluation provenance: numerical comparison only; apply blocked"
+        )
     print(f"{'APPLIED' if apply else 'DRY RUN'}: {result}")
     return result
 

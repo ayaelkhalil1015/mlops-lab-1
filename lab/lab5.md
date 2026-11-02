@@ -2,6 +2,30 @@
 
 Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
 
+## Current verified state — final review fixes (2026-11-02)
+
+- Original implementation `b070cb69f185072b751cd1d668c74b8dbdb701d1` was committed
+  and pushed. Its [GitHub Actions run](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41484869788)
+  passed `test` (24 tests) and `smoke`; publication was correctly skipped on the
+  feature branch. Older “not committed/pushed” and missing-data statements below
+  describe earlier attempts, not the current state.
+- Final review fixes now use a Docker context allowlist, bounded smoke requests,
+  MLflow health-based Compose readiness, and evaluation revision checks.
+- Local Ruff, frozen sync and **34 tests** pass. Both actual and synthetic Docker
+  context exports exclude credential files. Image build passes. Final smoke and
+  Compose evidence is recorded in the final-fix verification section below.
+- Original DVC data stays unchanged: 3,292 images with **43 cross-split duplicate
+  pairs**, all retained in the complete failure evidence below. The separate
+  `/tmp/food11-lab5-clean-05n8bP/dataset` derivative has 3,249 images, all 11 classes
+  in all three splits, and preserves every one of the 1,096 evaluation images.
+- Questions **6, 9, and 10 require further experimental evidence**: a measured CI
+  cache comparison, failing/fixed PR demonstration, and real model comparison.
+  Main protection is already configured; GHCR publication still needs its first
+  approved main push. No manual image publication or real promotion was run.
+
+
+## Lab questions
+
 1. **Why avoid real MLflow in unit tests?** Loading the champion couples tests to
    server availability, registry state, network access, model artifacts, and heavy
    initialization. Tests could change behavior when an alias moves. Tests use
@@ -21,7 +45,7 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
    using absolute differences and inclusive tolerance `tau`.
 5. **What does `needs: test` do?** It makes smoke wait for successful tests. Publishing
    waits for smoke. Failed upstream checks prevent dependent jobs from running.
-6. **First versus second execution time?** TODO: requires real execution. Record the
+6. **First versus second execution time?** **Further experimental evidence required.** TODO: requires real execution. Record the
    first and second Actions job durations on comparable commits/runners. The uv cache
    reuses downloaded dependencies; BuildKit's GHA cache reuses publication build layers.
    Cache hits can reduce work, but runner startup and network conditions still vary.
@@ -33,7 +57,10 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
 8. **Token permissions?** All jobs receive `contents: read`. Only the main-push
    publication job receives `packages: write`. GHCR login uses the short-lived
    `GITHUB_TOKEN`, never a committed personal token. Pull requests cannot publish.
-9. **Branch protection and failing PRs?** Manually create a rule for `main` in GitHub
+9. **Branch protection and failing PRs?** Read-only inspection verified that `main`
+   already requires pull requests and the `test` and `smoke` checks. No settings
+   were changed. The intentionally failing/passing PR demonstration still needs
+   further experimental evidence. To reproduce the configuration, create a rule in GitHub
    Settings → Rules → Rulesets (or branch protection). Require a pull request and
    successful `test` and `smoke` checks. Run the workflow once so checks appear in
    the selector. Disable bypass if appropriate for the course. Create a separate
@@ -41,16 +68,21 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
    then open a PR. Capture the failed test and blocked merge; smoke is skipped.
    Fix the test, commit and push, and capture both checks passing. Do not merge an
    intentionally broken test. TODO: requires real execution.
-10. **Actual promotion decisions?** TODO: requires real execution. No real aliases
+10. **Actual promotion decisions?** **Further experimental evidence required.** TODO: requires real execution. No real aliases
     were changed. Existing training records `test_accuracy`; new runs also record
     `test_size`. The gate uses incumbent accuracy p and computes
     `se = sqrt(p * (1-p) / n)`, promoting if candidate accuracy is at least
     `p + 2*se`, otherwise assigning `challenger`. This is the lab's approximate
     gate, not a full paired significance test. Compare runs evaluated on the same
-    held-out data revision. Supply verified `--n` for historical runs lacking size;
+    held-out data revision. New runs record `evaluation_revision` (content and
+    label/path SHA-256). The gate rejects differing revisions; missing provenance
+    allows a clearly marked numerical dry-run only and blocks `--apply`.
+    Supply verified `--n` for historical runs lacking size;
     missing metrics or run IDs fail rather than inventing values. The script checks
     for a changed champion before writes, but registry alias updates are not atomic
-    compare-and-swap: serialize real promotion operations.
+    compare-and-swap: simultaneous promotion operations **require coordination**,
+    such as one shared external lock/queue across all operators and runners.
+    A single-process recheck is not a distributed lock.
     Use a table of candidate/champion version, run ID, data revision, accuracies, n,
     se, threshold, and decision when collecting actual evidence.
 11. **Automate promotion with local MLflow?** Use a trusted private runner on the
@@ -111,6 +143,11 @@ No commits, pushes, GitHub setting changes, or real alias writes were performed.
 References: [GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
 [MLflow client API](https://mlflow.org/docs/latest/api_reference/python_api/mlflow.client.html).
 
+## Historical record — initial implementation before commit b070cb6
+
+The following attempts are historical and are superseded by the current status
+and final-fix verification sections. Failure evidence is retained intentionally.
+
 Read-only inspection of the local SQLite registry found `food11` version 1 as
 champion, produced by run `433ecb2fd112425ba68a0ef2c9968bec`, with recorded
 `test_accuracy=0.6706204379562044`. Only one registered version exists. No
@@ -123,7 +160,7 @@ before registration or comparison. No new training is necessary if those
 artifacts and evaluation provenance can be recovered; otherwise manually create
 a baseline and candidate with recorded evaluation size and shared data revision.
 
-## Verified local implementation results
+### Initial local implementation attempts (historical)
 
 - `uv add --dev pytest ruff httpx`: completed; lockfile updated.
 - `uv sync --frozen`: PASS (using `UV_CACHE_DIR=/tmp/food11-uv-cache`
@@ -152,7 +189,7 @@ a baseline and candidate with recorded evaluation size and shared data revision.
   smoke test remain unverified. Resolve Docker Desktop build-network connectivity
   to `files.pythonhosted.org` and retry; standalone container HTTP probes worked.
 
-## Manual GitHub execution sequence
+### Original proposed GitHub sequence (historical)
 
 After restoring and validating data and adding the real fixture, review changes,
 then run these commands yourself (none was run by the implementation assistant):
@@ -190,7 +227,7 @@ Record real CI durations, GHCR SHA tag, and PR evidence in this file. Real MLflo
 promotion remains a separate, explicitly approved operation after verified data
 and model-version selection. Do not pass `--apply` until that approval exists.
 
-## Earlier follow-up local execution (2026-11-02)
+### Earlier follow-up execution (historical, 2026-11-02)
 
 - Confirmed branch `feature/lab5-ci-cd`.
 - `UV_CACHE_DIR=/tmp/food11-uv-cache uv run dvc pull`: FAIL, exit 1.
@@ -404,7 +441,7 @@ Files added or updated in this restored-data step: `tests/fixtures/bread.jpg`,
 At that stage the Docker image had not been rebuilt after the validator/cleanup
 changes. The final verification below records the subsequent rebuild and smoke test.
 
-## Final clean-copy review and commit preparation (2026-11-02)
+## Clean-copy audit and original commit preparation (historical, 2026-11-02)
 
 The cleaned dataset remains separate at `/tmp/food11-lab5-clean-05n8bP/dataset`.
 It has exactly `training`, `evaluation`, and `validation` at its root, with exactly
@@ -501,3 +538,107 @@ The proposed commit stages 19 Lab 5 files: `.github/workflows/ci.yml`, `Dockerfi
 `Dockerfile.single` remains untracked and excluded. No original or cleaned DVC
 images, data pointers, credentials, or MLflow artifacts are staged. Preparing the
 index does not create a commit; HEAD remains unchanged.
+
+## Final-fix methodology and verification (2026-11-02)
+
+### Docker context security
+
+`.dockerignore` excludes everything by default, then admits only `Dockerfile`,
+`.dockerignore`, `pyproject.toml`, `uv.lock`, `README.md`, and `src/`. Additional
+exclusions cover credential/secret filenames, `.dvc`, `.aws`, `.ssh`, environment
+files, private keys and caches even when nested under `src`. No credential value
+is copied into this report. `.dvc/config.local` is neither modified nor exposed.
+
+Verified the context with a disposable `FROM scratch; COPY . /context/` build and
+local-only BuildKit export. The actual exported context includes all required
+serving inputs and excludes DVC/AWS configuration, local environment files, data,
+MLflow artifacts/registry, tests, and `Dockerfile.single`. A separate synthetic
+fixture verifies nested secret/environment/credential/key filenames are excluded
+by Docker itself. This checks actual context filtering, not only file patterns.
+
+### Provenance and promotion coordination
+
+`food11.provenance.evaluation_revision()` hashes a canonical manifest of relative
+evaluation paths (including class labels) and each file's SHA-256. The result is
+independent of the checkout location and modification times. New training runs
+record the actual evaluation revision alongside `test_size` before training
+starts. Keep that evaluation split fixed throughout training/evaluation. No
+historical run has been backfilled and no training was executed for these fixes.
+
+The gate still computes `se = sqrt(p * (1-p) / n)` from champion accuracy and
+selects champion only when candidate accuracy is at least `p + 2*se`:
+
+- Matching recorded evaluation revisions: comparison permitted; `--apply` also
+  records `quality_gate.evaluation_revision` and `quality_gate.provenance_status`.
+- Different recorded revisions: fail before any alias/tag write, even in dry-run.
+- Either revision missing: dry-run reports **UNVERIFIED** provenance; `--apply`
+  fails without writing tags or aliases. Explicit `--n` does not bypass this.
+
+Equal evaluation revisions do not certify the absence of training/evaluation
+leakage: run data validation before training. The unchanged original data still
+fails that gate. Historical evidence must be recovered and verified, or new
+comparable runs created after separately approved clean-data adoption.
+
+**Simultaneous promotion operations require coordination across every operator
+and runner**, for example a shared lock or single promotion queue. The existing
+champion recheck reduces stale decisions but is not atomic compare-and-swap;
+it does not eliminate a race between the recheck and alias write. Dry-run is
+still the default. No real promotion command or alias write was executed.
+
+### Compose readiness and smoke behavior
+
+MLflow has a stdlib-Python `/health` check (5-second interval/timeout, 12 retries,
+15-second start period). Inference depends on `mlflow: service_healthy` rather
+than mere startup order. Image build definitions, service names, ports, volume semantics,
+tracking URI and frontend API behavior remain unchanged. The health command needs
+neither curl nor an additional package. Health readiness does not create a model
+registry or champion: the existing Lab 4 prerequisite of a valid champion remains.
+
+The GitHub smoke loop retains 20 attempts and a 2-second delay and now calls
+`curl --connect-timeout 3 --max-time 5`. The main-only publication condition,
+minimal token permissions, full-SHA tag and build cache configuration are unchanged.
+
+References: [Docker build-context filtering](https://docs.docker.com/build/concepts/context/),
+[Compose health-based startup](https://docs.docker.com/compose/how-tos/startup-order/).
+
+### Local verification results before committing the fixes
+
+- `uv sync --frozen`: PASS.
+- `uv run ruff check src tests`: PASS.
+- `uv run pytest -q`: **34 passed, no skips**, 4 existing deprecation warnings.
+- Real and synthetic Docker context export checks: PASS.
+- `docker build -t food11-api:ci .`: PASS with the hardened build context.
+- `docker compose config --quiet`: PASS.
+
+The commands use `UV_CACHE_DIR=/tmp/food11-uv-cache` in this execution sandbox.
+No credential or dataset file will be staged. The new CI run will be checked
+following the approved commit/push and reported separately; it is not presumed
+successful before it runs.
+
+Final integration/preservation results:
+
+- Fresh `SKIP_MODEL=1` container: `/health` returned HTTP 200 with
+  `{"status":"ok"}` on attempt 6 using the bounded health loop; container removed.
+- Started the entire disposable Compose stack in one `up -d --no-build` operation,
+  using a copied SQLite registry and copied model artifacts. Compose explicitly
+  waited for MLflow **Healthy** before starting inference. No manual startup
+  ordering or restart was needed. Normal inference (without `SKIP_MODEL`) loaded
+  the copied champion and predicted `Bread` with confidence `0.8107056894018525`.
+  Frontend-to-inference HTTP over service DNS returned 200.
+- The disposable MLflow container started at `17:53:56 UTC`; inference started at
+  `17:54:19 UTC`, after the health check succeeded. All test containers/network
+  were removed; the real Compose volume was not used.
+- Before/after hashes confirm `.dvc/config.local`, the real MLflow database,
+  original model artifacts, every original mini image, and `Dockerfile.single`
+  are unchanged. `uv run dvc status`: “Data and pipelines are up to date.”
+- The original and cleaned evaluation splits produce identical evaluation
+  fingerprints. No historical MLflow parameter was added or changed.
+- Workflow YAML/Bash checks confirm the exact curl timeouts, unchanged retry
+  count/delay, main-only publication guard, and healthy Compose dependency.
+- `git diff --check`: PASS. Only the nine reviewed configuration, source, test,
+  and documentation files are included in this fix commit; no credential file,
+  dataset, registry, artifact, or `Dockerfile.single` is staged.
+
+Questions 6, 9 and 10 remain pending experiments. Matching provenance is not a
+replacement for data-quality validation, and this change does not authorize
+clean-data adoption or a real model promotion.

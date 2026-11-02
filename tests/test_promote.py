@@ -6,7 +6,9 @@ import pytest
 from food11.promote import decide, promote
 
 
-def client_for(candidate=0.9, champion=0.8, size="1000"):
+def client_for(
+    candidate=0.9, champion=0.8, size="1000", revisions=("revision-a", "revision-a")
+):
     client = Mock()
     client.get_model_version.return_value = SimpleNamespace(
         version="2", run_id="candidate"
@@ -17,10 +19,14 @@ def client_for(candidate=0.9, champion=0.8, size="1000"):
     client.get_run.side_effect = [
         SimpleNamespace(
             data=SimpleNamespace(
-                metrics={"test_accuracy": p}, params={"test_size": size} if size else {}
+                metrics={"test_accuracy": p},
+                params={
+                    **({"test_size": size} if size else {}),
+                    **({"evaluation_revision": revision} if revision else {}),
+                },
             )
         )
-        for p in (candidate, champion)
+        for p, revision in zip((candidate, champion), revisions, strict=True)
     ]
     return client
 
@@ -83,3 +89,53 @@ def test_missing_metric_does_not_write():
 def test_conflicting_size():
     with pytest.raises(ValueError, match="conflicts"):
         promote(client_for(), "2", n=10, apply=True)
+
+
+@pytest.mark.parametrize("apply", [False, True])
+def test_different_evaluation_revisions_block_comparison(apply):
+    client = client_for(revisions=("revision-a", "revision-b"))
+    with pytest.raises(ValueError, match="revisions differ"):
+        promote(client, "2", apply=apply)
+    client.set_registered_model_alias.assert_not_called()
+    client.set_model_version_tag.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "revisions", [(None, None), ("revision-a", None), (None, "revision-a")]
+)
+def test_historical_provenance_allows_only_unverified_dry_run(revisions, capsys):
+    client = client_for(revisions=revisions)
+    result = promote(client, "2")
+    assert result["provenance_status"] == "unverified"
+    assert result["evaluation_revision"] is None
+    assert "UNVERIFIED" in capsys.readouterr().out
+    client.set_registered_model_alias.assert_not_called()
+    client.set_model_version_tag.assert_not_called()
+    client = client_for(revisions=revisions)
+    with pytest.raises(ValueError, match="Missing evaluation_revision"):
+        promote(client, "2", apply=True)
+    client.set_registered_model_alias.assert_not_called()
+    client.set_model_version_tag.assert_not_called()
+
+
+def test_provenance_is_recorded_in_version_tags():
+    client = client_for()
+    promote(client, "2", apply=True)
+    tags = {
+        call.args[2]: call.args[3]
+        for call in client.set_model_version_tag.call_args_list
+    }
+    assert tags["quality_gate.provenance_status"] == "verified"
+    assert tags["quality_gate.evaluation_revision"] == "revision-a"
+
+
+def test_concurrent_champion_change_aborts_without_writes():
+    client = client_for()
+    client.get_model_version_by_alias.side_effect = [
+        SimpleNamespace(version="1", run_id="champion"),
+        SimpleNamespace(version="3", run_id="other"),
+    ]
+    with pytest.raises(ValueError, match="Champion changed"):
+        promote(client, "2", apply=True)
+    client.set_registered_model_alias.assert_not_called()
+    client.set_model_version_tag.assert_not_called()

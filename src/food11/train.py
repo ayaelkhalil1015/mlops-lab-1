@@ -21,6 +21,7 @@ from torchvision import datasets, models, transforms
 from torchvision.models import ResNet18_Weights
 
 import mlflow
+from food11.provenance import evaluation_revision
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASETS = {
@@ -225,6 +226,7 @@ def main() -> None:
                 "model_name": "resnet18",
                 "num_classes": NUM_CLASSES,
                 "test_size": len(dataloaders["test"].dataset),
+                "evaluation_revision": evaluation_revision(dataset_root / "evaluation"),
             }
         )
 
