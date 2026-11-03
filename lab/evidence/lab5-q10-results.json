@@ -1,0 +1,265 @@
+{
+  "experiment_id": "1",
+  "source_commit": "8c97344fe1fc23dd84bbdcd8f6c928fd6a43fed7",
+  "cpu_only": true,
+  "torch": "2.14.0+cpu",
+  "seed": 42,
+  "threads": 4,
+  "classes": [
+    "Bread",
+    "Dairy product",
+    "Dessert",
+    "Egg",
+    "Fried food",
+    "Meat",
+    "Noodles-Pasta",
+    "Rice",
+    "Seafood",
+    "Soup",
+    "Vegetable-Fruit"
+  ],
+  "dataset": {
+    "split_fingerprints": {
+      "training": "sha256:7f98cd95ceacbc46a4565f87d786062569f1857df87940a152e4b188ab9b22b5",
+      "validation": "sha256:77a158a26031c2d6c5084df42437143b823226426dc4ed5e4399c0238827f76e",
+      "evaluation": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867"
+    },
+    "counts": {
+      "training": 1095,
+      "validation": 1058,
+      "evaluation": 1096
+    },
+    "evaluation_preserved": true,
+    "original_unchanged": true
+  },
+  "evaluations": [
+    {
+      "accuracy": 0.6706204379562044,
+      "correct": 735,
+      "n": 1096,
+      "loss": 1.0572609297768043,
+      "role": "fresh-baseline",
+      "run_id": "581112bf213f4ac4b330c7e964f471e4",
+      "version": "1",
+      "evaluation_revision": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867",
+      "evaluation_seconds": 44.18,
+      "source_run": "433ecb2fd112425ba68a0ef2c9968bec"
+    },
+    {
+      "accuracy": 0.4552919708029197,
+      "correct": 499,
+      "n": 1096,
+      "loss": 1.814127776744592,
+      "role": "candidate-A-historical-one-epoch",
+      "run_id": "93bf996b2f5642f2bee7c261f5c91f4e",
+      "version": "2",
+      "evaluation_revision": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867",
+      "evaluation_seconds": 48.44,
+      "source_run": "23d83621bbd3416c8e72174f644decbe"
+    },
+    {
+      "accuracy": 0.781021897810219,
+      "correct": 856,
+      "n": 1096,
+      "loss": 0.6594294316142145,
+      "role": "candidate-B-clean-frozen-ImageNet-head",
+      "run_id": "3ffb8a1005ed49199f52a1b496a7e470",
+      "version": "3",
+      "evaluation_revision": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867",
+      "evaluation_seconds": 52.02,
+      "source_run": null
+    }
+  ],
+  "training": [
+    {
+      "epoch": 1,
+      "train_loss": 2.0851679990280707,
+      "val_accuracy": 0.5359168241965974,
+      "val_loss": 1.5956945590576288
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.3568480872672442,
+      "val_accuracy": 0.6512287334593573,
+      "val_loss": 1.2468811776101703
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.0436849223968645,
+      "val_accuracy": 0.6918714555765595,
+      "val_loss": 1.0863376159523745
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.8946513285375621,
+      "val_accuracy": 0.720226843100189,
+      "val_loss": 0.9745626269306262
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.784379388480426,
+      "val_accuracy": 0.719281663516068,
+      "val_loss": 0.9173482239584391
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.7003162862503365,
+      "val_accuracy": 0.723062381852552,
+      "val_loss": 0.8805240518880025
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.637535099569521,
+      "val_accuracy": 0.7476370510396976,
+      "val_loss": 0.8386209412197986
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.5984609487530304,
+      "val_accuracy": 0.7485822306238186,
+      "val_loss": 0.8229962440880124
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.5477851680696827,
+      "val_accuracy": 0.7495274102079396,
+      "val_loss": 0.7941517917780885
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.5109427638522022,
+      "val_accuracy": 0.7570888468809074,
+      "val_loss": 0.7907728729716772
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.48942475269918573,
+      "val_accuracy": 0.7514177693761814,
+      "val_loss": 0.7787038887831574
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.4575461061849986,
+      "val_accuracy": 0.7589792060491494,
+      "val_loss": 0.7683456890524448
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.4314674821618485,
+      "val_accuracy": 0.7551984877126654,
+      "val_loss": 0.7664996153465516
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.4108910242172137,
+      "val_accuracy": 0.7561436672967864,
+      "val_loss": 0.7622832898156179
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.38328776457538344,
+      "val_accuracy": 0.7589792060491494,
+      "val_loss": 0.7459041299351221
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.3698122579485314,
+      "val_accuracy": 0.7618147448015122,
+      "val_loss": 0.7404185691267421
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.35116646684468067,
+      "val_accuracy": 0.7599243856332704,
+      "val_loss": 0.7338860400006992
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.33708898626506056,
+      "val_accuracy": 0.7514177693761814,
+      "val_loss": 0.7326208143468615
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.31690841902336575,
+      "val_accuracy": 0.7533081285444234,
+      "val_loss": 0.7382154000504031
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.3101255436602248,
+      "val_accuracy": 0.7570888468809074,
+      "val_loss": 0.7456285538880721
+    }
+  ],
+  "selected_epoch": 16,
+  "selected_val_accuracy": 0.7618147448015122,
+  "dry_runs": {
+    "candidate-A-historical-one-epoch": {
+      "decision": "challenger",
+      "candidate_accuracy": 0.4552919708029197,
+      "champion_accuracy": 0.6706204379562044,
+      "standard_error": 0.014196504984959725,
+      "threshold": 0.6990134479261239,
+      "n": 1096,
+      "champion_version": "1",
+      "provenance_status": "verified",
+      "evaluation_revision": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867"
+    },
+    "candidate-B-clean-frozen-ImageNet-head": {
+      "decision": "champion",
+      "candidate_accuracy": 0.781021897810219,
+      "champion_accuracy": 0.6706204379562044,
+      "standard_error": 0.014196504984959725,
+      "threshold": 0.6990134479261239,
+      "n": 1096,
+      "champion_version": "1",
+      "provenance_status": "verified",
+      "evaluation_revision": "sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867"
+    }
+  },
+  "isolated_aliases": {
+    "champion": "1"
+  },
+  "elapsed_seconds": 405.64,
+  "preservation_audit": {
+    "protected_files_unchanged": 36,
+    "original_mini_images_unchanged": 3292,
+    "all_cleaned_images_match_source": true,
+    "all_1096_evaluation_images_preserved": true,
+    "isolated_aliases": [
+      {
+        "name": "food11",
+        "alias": "champion",
+        "version": 1
+      }
+    ],
+    "production_aliases_unchanged": true,
+    "versions": [
+      {
+        "version": "1",
+        "role": "fresh-baseline",
+        "weight_sha256": "02c68d81e1e204626d496de9031a1402eaf765f82ba15e686a56d23a73545682"
+      },
+      {
+        "version": "2",
+        "role": "candidate-A-historical-one-epoch",
+        "weight_sha256": "b1e3636224726320e38d1bb5b5e52b77c2ca345a1b9897fe9c32e504c7d07831"
+      },
+      {
+        "version": "3",
+        "role": "candidate-B-clean-frozen-ImageNet-head",
+        "weight_sha256": "da000db7068d709752ad84dad22c37775f0fae7faed1c4a68d0be0afd4171147"
+      }
+    ],
+    "selected_checkpoint": {
+      "epoch": 16,
+      "train_loss": 0.3698122579485314,
+      "val_accuracy": 0.7618147448015122,
+      "val_loss": 0.7404185691267421
+    },
+    "experiment_script_sha256": "51a52cdefc9545b864ba358832fe0da75422b62d2f98f32ef7ba17df7dba3a49"
+  },
+  "scope": "isolated CPU experiment; no production promotion",
+  "aliases_applied_to_candidates": false
+}

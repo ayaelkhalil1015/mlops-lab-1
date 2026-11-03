@@ -2,7 +2,7 @@
 
 Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
 
-## Current verified state — final review fixes (2026-11-02)
+## Current verified state — final submission (2026-11-03)
 
 - Original implementation `b070cb69f185072b751cd1d668c74b8dbdb701d1` was committed
   and pushed. Its [GitHub Actions run](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41484869788)
@@ -16,16 +16,24 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
   Compose evidence is recorded in the final-fix verification section below.
 - Original DVC data stays unchanged: 3,292 images with **43 cross-split duplicate
   pairs**, all retained in the complete failure evidence below. The separate
-  `/tmp/food11-lab5-clean-05n8bP/dataset` derivative has 3,249 images, all 11 classes
+  `/tmp/lab5-q10-20261103/dataset` derivative has 3,249 images, all 11 classes
   in all three splits, and preserves every one of the 1,096 evaluation images.
 - **Question 6 is complete** with two exact-commit CI attempts and measured
-  step/cache evidence; no cache-driven speedup is claimed. **Question 10 still
-  requires real model-comparison evidence. Question 9 is complete**: PR #1
+  step/cache evidence; no cache-driven speedup is claimed. **Question 10 now has
+  actual CPU training, comparable fresh evaluations, isolated versions and dry-run
+  decisions** (see 2026-11-03 results below). **Question 9 is complete**: PR #1
   demonstrated a blocked merge with a failing check, then successful checks after
-  restoring the assertion; the PR remains unmerged.
-  Main protection is already configured; GHCR publication still needs its first
-  approved main push. No manual image publication or real promotion was run.
+  restoring the assertion; PR #1 is now closed without merging and its evidence
+  remains below. PR #2 was merged normally into main; the main workflow passed
+  all three jobs and published the merge-SHA image to GHCR. See the final
+  publication verification section. No manual image publication or real
+  promotion was run.
 
+
+The dated sections below form an execution history. Statements that an action
+was pending or had not yet been executed describe that section's checkpoint;
+the current summary and final submission section take precedence. The complete
+43 duplicate-pair records and failing/passing CI evidence are intentionally retained.
 
 ## Lab questions
 
@@ -80,8 +88,14 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
    same branch produced 34 passing tests and successful Docker/smoke checks.
    GitHub then reported `mergeStateStatus: CLEAN`. No merge or bypass was attempted.
    Main and its rules were unchanged. Full commit/run evidence is recorded below.
-10. **Actual promotion decisions?** **Further experimental evidence required.** TODO: requires real execution. No real aliases
-    were changed. Existing training records `test_accuracy`; new runs also record
+10. **Actual promotion decisions?** The approved isolated experiment is complete:
+    fresh baseline 735/1,096 (67.0620%); candidate A, isolated v2, 499/1,096
+    (45.5292%) -> challenger; newly trained candidate B, isolated v3, 856/1,096
+    (78.1022%) -> qualifies as champion in dry-run. SE=0.014196504984959725;
+    threshold=0.6990134479261239. All three fresh runs record the same actual
+    evaluation revision and n=1,096. No production aliases changed, and the isolated
+    baseline alias remains v1. Full run IDs, training/selection evidence and
+    historical-leakage limitations are below. New runs record
     `test_size`. The gate uses incumbent accuracy p and computes
     `se = sqrt(p * (1-p) / n)`, promoting if candidate accuracy is at least
     `p + 2*se`, otherwise assigning `challenger`. This is the lab's approximate
@@ -104,7 +118,8 @@ Implementation uses the supplied requirements: `lab5-ci-cd.md` was not present.
     `--apply` only after approval. The current CI deliberately does not train,
     register, promote, or deploy models. To collect evidence, use existing registered
     versions with comparable evaluation records, or manually train and register
-    a baseline and candidate on the same DVC revision; no retraining was executed.
+    a baseline and candidate on the same verified data revision. The approved
+    Question 10 CPU experiment was run in isolation; production promotion was not.
 12. **Complete pipeline and responsibilities:**
 
 ```mermaid
@@ -147,10 +162,11 @@ docker rm -f food11-lab5-smoke
 # uv run python src/food11/promote.py --version "$VERSION" --n "$N"
 ```
 
-Publication, branch protection, PR evidence, cache timing measurements, and real
-promotion results require manual execution. Real Food-11 validation was executed;
-its duplicate failures and a separately validated clean derivative are recorded below.
-No commits, pushes, GitHub setting changes, or real alias writes were performed.
+Publication, branch protection, PR evidence, cache timing, data validation and
+the isolated model experiment have now been executed; see the dated evidence below.
+Real production alias writes were not performed. The published GHCR image still
+lacks a successful local pull/health verification because of the documented slow
+transfer. The following historical sections retain earlier attempts and failures.
 
 References: [GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
 [MLflow client API](https://mlflow.org/docs/latest/api_reference/python_api/mlflow.client.html).
@@ -433,7 +449,7 @@ clean-copy command. Review the cleanup policy and version a derivative explicitl
 before using it for training. Existing trained models may already have seen leaked
 images, so fixing the copy alone does not repair their evaluation results.
 
-**Remaining:** the original DVC revision correctly fails the leakage gate.
+**Historical checkpoint (superseded by later CI/GHCR/Q10 evidence):** the original DVC revision correctly fails the leakage gate.
 Publishing/adopting a reviewed clean data revision and retraining/evaluating on it
 have not been performed. GitHub checks/publication, branch protection and PR
 demonstration, CI timing measurements, and real model-promotion evidence remain
@@ -651,7 +667,7 @@ Final integration/preservation results:
   and documentation files are included in this fix commit; no credential file,
   dataset, registry, artifact, or `Dockerfile.single` is staged.
 
-Question 10 remains pending; Questions 6 and 9 are completed below. Matching provenance is not a
+At this historical pre-experiment checkpoint, Question 10 was pending; its completed isolated results now appear below. Matching provenance is not a
 replacement for data-quality validation, and this change does not authorize
 clean-data adoption or a real model promotion.
 
@@ -746,10 +762,11 @@ in PR merge eligibility. No actual merge was attempted in either state.
 - No DVC data or MLflow alias was changed. `Dockerfile.single` stayed untouched.
 - Publication was skipped for both event types: neither push was to main.
 - Returned to `feature/lab5-ci-cd` to record this evidence. The demonstration PR
-  remains open/unmerged and must not be used to merge the feature implementation.
+  was left open/unmerged at this checkpoint. It was subsequently closed without
+  merging after PR #2 merged; see the merge/publication section.
 
 **Question 9: complete.** Question 6 measurements follow below. Question 10
-still requires its separate experimental evidence. The existing 43 duplicate-pair records remain preserved.
+was pending at this checkpoint and is now completed in the isolated experiment below. The existing 43 duplicate-pair records remain preserved.
 
 ## Question 6 — measured comparable CI execution times (2026-11-02)
 
@@ -843,10 +860,518 @@ for the separate main-only publication job, which was skipped in this experiment
 its performance is not measured or credited here.
 
 **Question 6: complete as a measured timing/cache comparison.** Question 9 evidence
-is preserved in full above. Question 10 (real comparable models/promotion results)
-remains incomplete and no real MLflow alias has been changed.
+is preserved in full above. Question 10 was incomplete at this checkpoint; its
+completed isolated dry-run results now appear below. No real MLflow alias changed.
 
 Documentation verification for this update: local Ruff passes; pytest reports
 34 passed, no skips, with four existing deprecation warnings. All 12 answers,
 balanced code fences, JSON PR-state examples, Q9 run/commit links, and the 43
 original duplicate-pair records were checked. `git diff --check` passes.
+
+
+## Merge and GHCR publication verification (2026-11-02)
+
+With explicit approval, [PR #2](https://github.com/ayaelkhalil1015/mlops-lab-1/pull/2)
+was rechecked: OPEN, non-draft, MERGEABLE/CLEAN, with all required `test` and
+`smoke` checks passing. It was merged using the normal pull-request merge process
+(no administrative bypass), guarded against head changes with
+`--match-head-commit 8c97344fe1fc23dd84bbdcd8f6c928fd6a43fed7`.
+
+- Merge commit on `main`: `fca49548300fd939a05d942162b58cac694e1de2`.
+- Merge time: 2026-11-02 21:30:24 Asia/Beirut (19:30:24 UTC).
+- GitHub returned HTTP 502 during the merge command; a follow-up API query
+  confirmed the merge succeeded. No second merge was attempted.
+- [Temporary PR #1](https://github.com/ayaelkhalil1015/mlops-lab-1/pull/1)
+  was closed without merging (`state=CLOSED`, `mergedAt=null`). Its branch,
+  failing/passing workflow runs, and complete Question 9 evidence were preserved.
+
+The [main push workflow](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41510559493)
+ran against the exact merge commit and completed successfully:
+
+| Job | Result | Job duration | Evidence |
+|---|---|---:|---|
+| test | PASS | 59 s | [Job 125501009119](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41510559493/job/125501009119); Ruff passes; 34 passed, 4 existing deprecation warnings in 11.78 s |
+| smoke | PASS | 133 s | [Job 125501563642](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41510559493/job/125501563642); Docker build and SKIP_MODEL health check |
+| push | PASS | 311 s | [Job 125502747870](https://github.com/ayaelkhalil1015/mlops-lab-1/actions/runs/41510559493/job/125502747870); automatic GHCR publication |
+
+The main-only publication condition is now verified by an actual successful
+`push` event on `main`, in addition to the earlier skipped publication jobs on
+feature pushes and PR events. No image was published manually.
+
+Published image:
+
+```text
+ghcr.io/ayaelkhalil1015/mlops-lab-1:fca49548300fd939a05d942162b58cac694e1de2
+```
+
+Publication log manifest digest:
+
+```text
+sha256:6f71b26089296d651c518bc5e6321d8e8d3f084f54d59424fb9c6fae3599ce9a
+```
+
+Local verification commands:
+
+```bash
+docker pull ghcr.io/ayaelkhalil1015/mlops-lab-1:fca49548300fd939a05d942162b58cac694e1de2
+docker buildx imagetools inspect ghcr.io/ayaelkhalil1015/mlops-lab-1:fca49548300fd939a05d942162b58cac694e1de2
+```
+
+- **Registry verification PASS:** `imagetools inspect` resolves this exact tag to
+  the publication digest above. Its runnable manifest is `linux/amd64`, digest
+  `sha256:3040c3812750952843808f732801d3a4d854377ed7454a200534bfb11c114a80`;
+  the index also contains a provenance attestation manifest. The compressed
+  platform layers total about 500.7 MiB; the dependency layer is about 459.4 MiB.
+- Docker Desktop was initially stopped: WSL Docker was unavailable, and the
+  Windows client reported that `dockerDesktopLinuxEngine` could not be found.
+  Starting the installed Docker Desktop restored the engine (version 29.8.0).
+- **Local pull INCOMPLETE:** the first pull remained on dependency layer
+  `99be45e57e88` for roughly 15 minutes and was terminated (exit 143). A second
+  live-progress request was stopped; the daemon logged contention for the same
+  content reference. No network root cause was established.
+- A single bounded retry, `timeout --signal=TERM 300 docker pull` with the same
+  image reference, also failed to complete and exited **124** after 300 seconds.
+  The CLI showed `Pulling fs layer` without a final digest/success response.
+- `docker image inspect` then exited **1** with `No such image` for the exact
+  merge-SHA tag. Thus presence of the complete published image locally is **not
+  verified**. This is a local transfer/content-handling blocker; registry
+  publication itself passed and its tag/digest were independently read.
+- **Local pulled-image health check INCOMPLETE:** the image was unavailable, so
+  no container was started from it and no local HTTP 200 is claimed. The main
+  workflow's separate build-and-health smoke job did pass; that does not replace
+  this requested pulled-image verification.
+
+Once the local pull issue is resolved, run:
+
+```bash
+image=ghcr.io/ayaelkhalil1015/mlops-lab-1:fca49548300fd939a05d942162b58cac694e1de2
+docker pull "$image"
+docker image inspect "$image" --format '{{json .RepoDigests}}'
+docker run -d --name food11-ghcr-verify -p 127.0.0.1:18006:8000 -e SKIP_MODEL=1 "$image"
+# Allow startup, then check HTTP 200; retry if still starting.
+curl --fail --connect-timeout 3 --max-time 5 -i http://127.0.0.1:18006/health
+docker logs food11-ghcr-verify
+docker rm -f food11-ghcr-verify
+```
+
+No DVC datasets, MLflow aliases, model artifacts, or `Dockerfile.single` were
+modified by these operations. Existing containers were not restarted. The complete
+43 duplicate-pair records and Question 9 evidence remain intact. This evidence
+update is local on `feature/lab5-ci-cd`, uncommitted and unpushed; it is not part of
+the merged commit or published image. Question 10 was still pending at this
+checkpoint and was subsequently completed in the isolated experiment below.
+
+## GHCR diagnosis and Question 10 preparation (2026-11-03)
+
+This section supplements, rather than replaces, the merge/publication evidence
+above. No training, registry writes, alias changes, DVC writes, or commits were
+performed during this investigation.
+
+### GHCR access, capacity, and transfer diagnosis
+
+- Docker engine responds (29.8.0), but the exact merge-SHA image is still absent:
+  `docker image inspect` returns `No such image`. Successful local pull and local
+  pulled-image health remain **INCOMPLETE**. Main publication remains **PASS**.
+- DNS resolves `ghcr.io` to `140.82.121.33` from this environment. HTTPS/TLS
+  requests succeed. `/v2/` returns the expected HTTP 401 Bearer challenge;
+  requesting an anonymous pull token returns HTTP 200. The exact tag's index
+  and linux/amd64 manifest both return HTTP 200 without personal credentials.
+  The index digest still matches
+  `sha256:6f71b26089296d651c518bc5e6321d8e8d3f084f54d59424fb9c6fae3599ce9a`.
+- Anonymous layer access succeeds: HTTP 206 for a bounded 1 MiB range, then for
+  a different 4 MiB range. Thus this image is publicly pullable and does **not**
+  require `docker login ghcr.io` for these reads. Formal package visibility
+  metadata could not be read with the current GH CLI token: the Packages API
+  returned HTTP 403, `You need at least read:packages scope to get a package`.
+  That token-scope limitation is not evidence of a private image. No login or
+  credential changes were performed and no token was printed or persisted.
+- The 4 MiB range took 12.16 seconds: approximately 0.329 MiB/s. At that sampled
+  rate, the 459.4 MiB dependency layer would take about 1,396 seconds (23 minutes),
+  excluding unpacking and other layers. This is an estimate, not a measured full
+  pull. Slow large-blob transfer is a plausible explanation for the prior
+  roughly 15-minute cancellation and five-minute timeout; an additional Docker
+  content-handling problem has not been ruled out. Earlier content-lock messages
+  occurred while duplicate requests shared the pending layer and do not alone
+  establish the original failure's cause.
+- Space is ample: approximately 939 GiB free on the repository filesystem,
+  637 GiB on the Windows drive, and 918.14 GiB available in Docker's filesystem.
+  The latter was measured inside an existing local image using a read-only,
+  network-disabled, disposable container without host mounts. No pruning or
+  existing-container restart was performed.
+- **No new full-image pull was attempted.** Only 5 MiB of layer ranges were
+  sampled. A short full retry would be unlikely to finish at the observed rate.
+  Publication is verified; local pull and health remain explicitly incomplete.
+
+Next GHCR step: on a faster/stable connection, or when at least 30 minutes can be
+allowed, make one bounded pull attempt (no concurrent duplicate pulls):
+
+```bash
+image=ghcr.io/ayaelkhalil1015/mlops-lab-1:fca49548300fd939a05d942162b58cac694e1de2
+timeout --signal=TERM --kill-after=10s 1800 docker pull "$image"
+# Only after exit 0:
+docker image inspect "$image" --format '{{json .RepoDigests}}'
+# Then use the SKIP_MODEL health-check commands above.
+```
+
+If that fails, retain the exact exit code and Docker diagnostics; do not claim
+success or restart the engine while other workloads are running without
+coordination. Reassess proxy/VPN/firewall and blob-host throughput rather than
+repeatedly downloading the image. No registry login is currently indicated.
+
+### Question 10: read-only inventory
+
+Source: local `mlflow.db` opened with SQLite `mode=ro`; no remote tracking store
+or container-volume registry is assumed equivalent. Five FINISHED runs in the
+`food11` experiment have these recorded results:
+
+| Run ID | Epochs | Learning rate | Batch | Recorded test accuracy |
+|---|---:|---:|---:|---:|
+| `23d83621bbd3416c8e72174f644decbe` | 1 | 0.001 | 32 | 0.4552919708029197 |
+| `433ecb2fd112425ba68a0ef2c9968bec` | 5 | 0.01 | 32 | 0.6706204379562044 |
+| `1bd8a656153344b9b4b08da8c7156491` | 5 | 0.001 | 32 | 0.6715328467153284 |
+| `8ea854b1813b40a8a7a3d8f59e569e83` | 5 | 0.0001 | 32 | 0.36496350364963503 |
+| `a29b99f995bb4f8892c5ceaa0f302d19` | 5 | 0.001 | 64 | 0.6523722627737226 |
+
+All report mini/ResNet18/CPU/11 classes. Each has a local MLmodel and a
+44,812,363-byte `data/model.pth` artifact; they were enumerated without loading
+or modifying the models. One additional FINISHED Default-experiment run,
+`45b8b71649db4145a588074eb9552816`, has no params or metrics and is not a candidate.
+
+The only registered version is `food11` **v1**, READY, producing run
+`433ecb2fd112425ba68a0ef2c9968bec`, model ID
+`m-850eeae634084971b79fdaa0dee63ba7`; `champion` points to v1. No challenger alias
+is recorded. The other four logged models are not registered versions.
+
+None of these historical Food-11 runs has `test_size` or `evaluation_revision`.
+Logged-model metric dataset names/digests are also null. Do not backfill these
+runs from today's files or infer historical evaluation size from rounded
+accuracy alone.
+
+Current files, independently measured:
+
+- Original mini: training 1,100; validation 1,096; evaluation **1,096**.
+- Evaluation has all 11 classes: 100 images each except Rice, which has 96.
+- Evaluation revision using `food11.provenance.evaluation_revision`:
+  `sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867`.
+- Full mini manifest fingerprint using the previously recorded default-JSON
+  serialization: `dba71f538e0a8c5caa8e4c0e18ea2174c7697116a49c0c9f3169d907f4193418`;
+  this matches the prior original-data evidence. It uses a different manifest
+  scope/serialization from `evaluation_revision` and is not interchangeable.
+- Unchanged `data.dvc`: directory MD5 `74f5439237c40653593e6f7d28cd4c21.dir`,
+  36,578 files, 1,277,237,495 bytes. This is the recorded whole-data DVC identity,
+  not an independent check of every full-dataset file today.
+- The earlier `/tmp/food11-lab5-clean-05n8bP/dataset` is no longer available.
+  Its historical results remain valid evidence of that earlier check, but it
+  cannot currently serve as the experiment's training input.
+
+### Historical Question 10 proposal — subsequently approved and executed
+
+1. Create a new separate, validated cleanup derivative using the documented
+   evaluation-first duplicate policy. Preserve the original DVC files and all
+   1,096 evaluation images byte-for-byte. Verify 11 classes per split, no
+   cross-split duplicates, counts, and evaluation revision. Keep all 43 original
+   duplicate-pair records. Record new full training/validation/evaluation
+   fingerprints and the source commit, environment, class map, transforms,
+   random seeds, and candidate-selection protocol.
+2. Copy trusted model artifacts into an isolated experiment directory before
+   loading, since MLflow can write auxiliary metadata while loading. Reevaluate
+   the existing v1 champion on that fixed evaluation set under the same inference
+   transform. Create a **new** evaluation record, with actual correct/total,
+   `test_accuracy`, `test_size`, `evaluation_revision`, artifact hash and source
+   model/run; do not edit its historical run or alias. Use an isolated tracking
+   store so production registry contents remain untouched.
+3. Candidate A (expected challenger): reevaluate the existing one-epoch model
+   `23d83621bbd3416c8e72174f644decbe` using exactly the same fixed set, transforms,
+   label mapping and metric computation. Its historical 45.53% suggests rejection,
+   but the actual fresh measurement decides. Existing models were trained before
+   leakage cleanup; disclose that limitation. Their reevaluation does not erase
+   possible training leakage.
+4. Candidate B (possible champion): after separate training approval, train a
+   ResNet18 candidate on the cleaned derivative, starting with batch 32, learning
+   rate 0.001 and a predeclared 10–20 epoch validation-selected schedule. Fix and
+   log seeds and exact preprocessing. Select settings/checkpoints using validation
+   only; evaluate the selected candidate once on the same held-out evaluation
+   split. Promotion is not guaranteed. The existing 67.15% run is useful context,
+   but its small recorded gain does not demonstrate that it clears the gate.
+5. For strict leakage-free claims, a baseline and candidate A must also be
+   retrained on the same cleaned training split after approval, rather than
+   treating historical artifacts as leakage-free. The cheaper reevaluation
+   phase can demonstrate numerical gate behavior with the disclosed limitation;
+   it cannot demonstrate clean-data generalization for historical models.
+6. Run the existing pure `decide(candidate_accuracy, baseline_accuracy, n)` gate
+   on fresh records, with no alias writes. Illustratively only, the historical
+   baseline 0.6706204379562044 and today's n=1,096 give SE=0.014196504984959725
+   and threshold=0.6990134479261239 (at least 767/1,096 correct). These are not
+   verified historical-comparability results; recompute from the fresh baseline.
+   If B fails, report challenger rather than choosing a result to force promotion.
+7. Exercise version/tag/promotion plumbing only in a separately approved disposable
+   registry with an experimental baseline. The production registry stays unchanged.
+   Real promotion requires matching recorded provenance, explicit later approval,
+   and coordinated single-writer execution. The current `promote` CLI hardcodes
+   `food11` and compares against `champion`; it must not be aimed at production
+   merely to demonstrate Question 10.
+
+Implementation preparation needed before training: `train.py` currently accepts
+only `mini`/`processed` roots and hardcodes its tracking URI/experiment; it has no
+seed option. An approved isolated harness or narrowly scoped dataset-root,
+tracking/experiment and seed options are needed to use the separate cleaned
+copy safely. Do not replace the DVC directory or run the current training command
+against production tracking as a shortcut. No such changes were made now.
+
+At this proposal checkpoint, Question 10 was **INCOMPLETE**. The approved
+experiment and actual outcomes are now recorded in the following section. This proposal and all prior GHCR
+evidence remain uncommitted in `lab/lab5.md`.
+
+## Question 10 — actual isolated CPU experiment (2026-11-03)
+
+This completes the approved **isolated evaluation/training/dry-run experiment**,
+not a production promotion. It supersedes earlier Question 10 TODO/proposal
+statements while preserving them as historical evidence. No production aliases,
+historical runs, original model artifacts, or DVC files were changed.
+
+### Dataset, contracts and evaluation provenance
+
+The existing `food11.deduplicate_data.clean_copy` recreated a separate derivative
+at `/tmp/lab5-q10-20261103/dataset`, preserving evaluation first, validation second,
+training last. It copied 3,249 images and excluded 43 cross-split duplicates.
+The original remains 3,292 images, with all 43 duplicate-pair records retained
+above. Every copied image matches its original source bytes. All 1,096 evaluation
+paths and bytes are identical to the original evaluation split.
+
+| Check | Training | Validation | Evaluation |
+|---|---|---|---|
+| Image count | 1,095 | 1,058 | 1,096 |
+| Exactly 11 class directories | PASS | PASS | PASS |
+| At least 50 images per class | PASS | PASS | PASS |
+| Every image readable | PASS | PASS | PASS |
+| Every image RGB | PASS | PASS | PASS |
+| Every image 128x128 | PASS | PASS | PASS |
+| No cross-split duplicates | PASS | PASS | PASS |
+
+Training/validation class-proportion differences at tau=0.05: **PASS**. Overall
+contract validation: **PASS**, no failures. Evaluation contains all 11 classes,
+100 images per class except Rice (96).
+
+Each split fingerprint uses the implemented canonical relative-path/label and
+file-content SHA-256 scheme (`evaluation_revision`), applied to that split:
+
+- training: `sha256:7f98cd95ceacbc46a4565f87d786062569f1857df87940a152e4b188ab9b22b5`.
+- validation: `sha256:77a158a26031c2d6c5084df42437143b823226426dc4ed5e4399c0238827f76e`.
+- evaluation: `sha256:be28a6ce8218f9ac6d614eea7a5eaf26208a73e1b9ef9c965f600ecc559ff867`.
+
+The evaluation fingerprint and actual `test_size=1096` are recorded as params in
+**every new evaluation run**. Historical params were not backfilled. The original
+full mini manifest remains
+`dba71f538e0a8c5caa8e4c0e18ea2174c7697116a49c0c9f3169d907f4193418` using its previously
+documented different manifest serialization.
+
+### Isolation and reproducibility
+
+- Working directory: `/tmp/lab5-q10-20261103`.
+- Tracking and registry URI: `sqlite:////tmp/lab5-q10-20261103/isolated-mlflow.db`.
+- Experiment: `lab5-q10-20261103`, experiment ID `1` in this new store.
+- Artifact root: `file:///tmp/lab5-q10-20261103/mlartifacts`.
+- Registered model name `food11` exists only in this isolated store for these
+  operations. Its version numbers below do not identify production versions.
+- The copied baseline was registered as isolated v1 and assigned the isolated
+  `champion` alias solely to exercise the existing gate. That alias remains v1.
+  No isolated candidate aliases were applied; no production registry was targeted.
+- Source checkout: `8c97344fe1fc23dd84bbdcd8f6c928fd6a43fed7` (feature branch);
+  production source had already merged as `fca49548300fd939a05d942162b58cac694e1de2`.
+- Torch `2.14.0+cpu`, torchvision `0.29.0+cpu`, MLflow `3.16.0`;
+  `CUDA_VISIBLE_DEVICES=''`, CPU only, four Torch compute threads and one interop
+  thread. Python, NumPy and Torch seeds are 42, with deterministic Torch algorithms.
+- All three evaluations use the same alphabetical ImageFolder class mapping,
+  Resize(256), CenterCrop(224), ToTensor, ImageNet mean/std normalization,
+  model eval mode, batch size 32, and exact argmax correct/total accuracy.
+- Historical baseline and one-epoch artifacts were copied before loading.
+  MLflow auxiliary metadata writes, if any, are confined to copies. The new
+  model starts independently from torchvision ImageNet ResNet18 weights
+  `resnet18-f37072fd.pth`, downloaded into the isolated Torch cache. It does not
+  inherit historical Food-11 weights or batch-normalization buffers.
+
+### Fresh registered evaluations and actual gate decisions
+
+| Role | Isolated version | Fresh run ID | Correct / evaluation size | Actual accuracy | Dry-run outcome |
+|---|---|---|---:|---:|---|
+| fresh-baseline | 1 | `581112bf213f4ac4b330c7e964f471e4` | 735 / 1096 | 0.6706204379562044 (67.0620%) | Baseline (unchanged) |
+| candidate-A-historical-one-epoch | 2 | `93bf996b2f5642f2bee7c261f5c91f4e` | 499 / 1096 | 0.4552919708029197 (45.5292%) | challenger |
+| candidate-B-clean-frozen-ImageNet-head | 3 | `3ffb8a1005ed49199f52a1b496a7e470` | 856 / 1096 | 0.7810218978102190 (78.1022%) | champion |
+
+Baseline source: production `food11` v1, historical run
+`433ecb2fd112425ba68a0ef2c9968bec`. Candidate A source: historical one-epoch run
+`23d83621bbd3416c8e72174f644decbe` (previously unregistered). Their fresh evaluation
+metrics happen to equal the historical values, but comparability here is
+established by the **new measured runs**, not inferred from that coincidence.
+Each fresh run stores its accuracy, correct count, loss, evaluation revision,
+size, role, class map, transform protocol and model/source provenance.
+
+Registered artifact SHA-256 hashes (new serialized artifacts, distinct from
+historical source-file hashes):
+
+- Isolated v1: `02c68d81e1e204626d496de9031a1402eaf765f82ba15e686a56d23a73545682`.
+- Isolated v2: `b1e3636224726320e38d1bb5b5e52b77c2ca345a1b9897fe9c32e504c7d07831`.
+- Isolated v3: `da000db7068d709752ad84dad22c37775f0fae7faed1c4a68d0be0afd4171147`.
+
+The actual existing `food11.promote.promote(client, version, apply=False)` function
+was called against isolated v2 and v3. Both reported `provenance_status=verified`
+and compared against the isolated fresh-baseline v1:
+
+```text
+n = 1096
+p_baseline = 735 / 1096 = 0.6706204379562044
+SE = sqrt(p_baseline * (1 - p_baseline) / n)
+   = 0.014196504984959725
+threshold = p_baseline + 2 * SE = 0.6990134479261239
+minimum qualifying correct count = 767 / 1096
+candidate A: 499 / 1096 < threshold -> challenger
+candidate B: 856 / 1096 >= threshold -> champion (qualifies; NOT applied)
+```
+
+Candidate B improves on the measured baseline by 121 correct images, or
+11.0401 percentage points. The lab's two-SE heuristic is not a full paired
+significance test or proof of independent generalization. Both calls were dry-run;
+quality-gate decision tags and candidate aliases were not written by `--apply`.
+The only alias in the isolated store after both calls remains `champion -> 1`.
+The production registry still has its original `champion -> 1` and no challenger.
+
+### Actual training and validation-only checkpoint selection
+
+Candidate B is one new model: ImageNet ResNet18 with frozen backbone, including
+fixed batch-normalization buffers, and a newly initialized 512-to-11 linear head.
+Features were cached from the cleaned training and validation splits with the
+backbone in eval mode. Adam optimized only the head, learning rate 0.001,
+batch size 32, for the predeclared 20 epochs; training batches were shuffled with
+seed 42. This is an isolated harness rather than the production-oriented training
+CLI, which hardcodes dataset/tracking destinations. No CLI or Docker change was
+needed. Backbone freezing in eval mode is explicit and differs from the old
+trainer's whole-model train mode.
+
+Hyperparameters and the epoch budget were fixed before training. Checkpoint
+selection used maximum validation accuracy, with minimum validation loss to break
+ties. No evaluation accuracy was used for selection or further tuning. The final
+candidate was evaluated exactly once after selection. Validation selected
+**epoch 16**: 806/1,058 correct, accuracy **0.7618147448015122**, validation loss
+**0.7404185691267421**, and training loss **0.3698122579485314**. The final epoch
+20 training loss was **0.3101255436602248**; its lower training loss did not override
+validation checkpoint selection.
+
+| Epoch | Training loss | Validation accuracy | Validation loss |
+|---:|---:|---:|---:|
+| 1 | 2.085168 | 0.535917 | 1.595695 |
+| 2 | 1.356848 | 0.651229 | 1.246881 |
+| 3 | 1.043685 | 0.691871 | 1.086338 |
+| 4 | 0.894651 | 0.720227 | 0.974563 |
+| 5 | 0.784379 | 0.719282 | 0.917348 |
+| 6 | 0.700316 | 0.723062 | 0.880524 |
+| 7 | 0.637535 | 0.747637 | 0.838621 |
+| 8 | 0.598461 | 0.748582 | 0.822996 |
+| 9 | 0.547785 | 0.749527 | 0.794152 |
+| 10 | 0.510943 | 0.757089 | 0.790773 |
+| 11 | 0.489425 | 0.751418 | 0.778704 |
+| 12 | 0.457546 | 0.758979 | 0.768346 |
+| 13 | 0.431467 | 0.755198 | 0.766500 |
+| 14 | 0.410891 | 0.756144 | 0.762283 |
+| 15 | 0.383288 | 0.758979 | 0.745904 |
+| 16 | 0.369812 | 0.761815 | 0.740419 |
+| 17 | 0.351166 | 0.759924 | 0.733886 |
+| 18 | 0.337089 | 0.751418 | 0.732621 |
+| 19 | 0.316908 | 0.753308 | 0.738215 |
+| 20 | 0.310126 | 0.757089 | 0.745629 |
+
+Total experiment wall time, including fresh baseline/A evaluations, ImageNet
+weight download, feature extraction, training, logging/registration, candidate B
+evaluation and gate calls: **405.64 seconds**. This is not training-only
+runtime.
+
+### Preservation audit, limitations and remaining work
+
+- Full SHA-256 comparison confirms all **3,292 original mini images** unchanged.
+- All **36 protected files**, including the original MLflow database, historical
+  artifact tree, DVC pointer and Docker files present in the snapshot, are unchanged;
+  no files were added to the original artifact tree. `Dockerfile.single` retains
+  SHA-256 `eba857ec83f115981f19cef53bade1fc02374a22aa3e309232de469d8af48df6`.
+- All cleaned files match their source bytes; all 1,096 evaluation images and all
+  three split fingerprints were rechecked after the experiment.
+- All isolated versions are READY; database checks match each version to its fresh
+  run, actual metric, n and evaluation fingerprint. Validation selection was
+  independently checked against the 20 recorded epochs.
+- Historical baseline and candidate A were trained before deduplication. Their
+  fresh metrics have verified evaluation provenance but retain possible historical
+  train/evaluation leakage. Re-evaluation does not undo that exposure. Candidate B
+  was trained on the cleaned copy, but this comparison is not a fully controlled
+  retraining of every baseline on clean data. The old test results were already
+  known; do not describe this as a newly blinded benchmark. A stricter scientific
+  comparison would retrain all models under a common clean-data protocol and use
+  an independently held-out test set.
+- MLflow emitted nonblocking trusted-pickle and missing-installed-pip-version
+  warnings while saving model copies; all registrations and checks succeeded.
+- Local Ruff passes; pytest: **34 passed, 4 existing deprecation warnings**.
+  Documentation checks preserve all 43 duplicate records and prior GHCR/Q9 evidence;
+  `git diff --check` passes after the update.
+- Raw local evidence: `setup.log`, `dataset-evidence.json`, `experiment.py`,
+  `experiment.log`, `results.json`, `audit.py`, `audit.json`, and `pytest.log` in
+  `/tmp/lab5-q10-20261103`. Experiment script SHA-256:
+  `51a52cdefc9545b864ba358832fe0da75422b62d2f98f32ef7ba17df7dba3a49`.
+  They have now been archived locally under `.lab5-local/q10-20261103`, excluded
+  from Git, with a full SHA-256 manifest. See the final submission section.
+- **Question 10's approved isolated dry-run experiment is complete.** No real
+  promotion, commit or push was performed. Production promotion/deployment and
+  applying quality-gate tags remain separate actions requiring approval.
+- Remaining previously requested verification: the GHCR publication is successful,
+  but a complete local pull and health check of that exact published image are
+  still incomplete. This task did not retry that image or alter Docker settings.
+- This evidence was initially uncommitted on `feature/lab5-ci-cd`. The approved
+  final documentation is now prepared on `docs/lab5-final-submission` for a separate
+  protected-main pull request; no direct push or merge into main is performed.
+
+
+## Final submission review (2026-11-03)
+
+All 12 questions are answered. The final submission records actual CI timing
+without claiming an unmeasured cache benefit, temporary PR #1's failing/blocked
+and restored/passing checks, PR #2's merge, main-only successful GHCR publication,
+real-data validation and all 43 duplicate pairs, and Question 10's completed CPU
+experiment with fresh evaluation provenance. PR #1 remains closed without merge.
+
+Small, sanitized reproducibility files:
+
+- [`lab5-q10-results.json`](evidence/lab5-q10-results.json): all three isolated
+  versions/run IDs, measured correct counts/accuracies and evaluation revision,
+  all validation epochs, selected checkpoint, gate outcomes and preservation audit.
+- [`verify_lab5_q10.py`](evidence/verify_lab5_q10.py): standard-library verification
+  of correct/total accuracy, standard error, threshold, minimum qualifying count,
+  both decisions, validation-only selection and unapplied candidate aliases.
+- [`evidence/README.md`](evidence/README.md): verification and archive instructions.
+
+Run `python3 lab/evidence/verify_lab5_q10.py`. It independently recalculates the
+recorded arithmetic: SE=0.014196504984959725, threshold=0.6990134479261239,
+minimum 767/1,096. Isolated v2 is a challenger; isolated v3 **qualifies** as champion
+at 856/1,096. Neither candidate alias was applied. Verified provenance does not
+remove the historical models' possible training leakage, and this approximate
+two-SE gate is not a paired significance test.
+
+The full 331,619,942-byte local archive contains 3,294 files: isolated registry,
+model artifacts, cleaned data, selected checkpoint, scripts and logs. The manifest
+is `.lab5-local/q10-20261103-sha256.json`; the directory is ignored through local
+`.git/info/exclude`. No tracking database, model weights, dataset, local credentials
+or `Dockerfile.single` is included in the submission. The SQLite snapshot retains
+its original `/tmp` artifact URIs; use the archived relative artifact paths in a
+disposable working copy or restore the original isolated location when inspecting.
+The archive is not a remote backup.
+
+Remaining limitations: the exact published GHCR image's local pull/health check
+remains incomplete; no further long download was attempted. The original DVC
+revision retains its known leakage, and production adoption of a cleaned revision
+or real model promotion is outside this submission. The instructor file
+`lab5-ci-cd.md` was not available; the supplied request and implemented questions
+were used. Production aliases, historical runs/artifacts and original DVC data
+remain unchanged. All previous evidence remains preserved.
+
+Final local verification: Ruff passes for `src`, `tests` and the new verifier;
+pytest passes all 34 tests with four existing deprecation warnings. The evidence
+verifier, all 12 question entries, 43 duplicate records, JSON/code-fence checks,
+archive checksums and `git diff --check` pass. Only this documentation and the
+three small evidence/reproducibility files are intended for the submission commit.
+GitHub checks for this new documentation PR must also complete successfully before
+any later merge; this task does not merge the PR or publish an image manually.
